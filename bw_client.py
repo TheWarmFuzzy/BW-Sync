@@ -1,14 +1,56 @@
+from file_manager import FileManager
 import socket
 from time import sleep
 
 class BWClient:
 	def __init__(self):
+		self.fm = FileManager()
+		
+		#Default Configurations
 		self.DEBUG = True
 		self.HOST = socket.gethostname()
 		self.PORT = 1234
 		self.TIMEOUT = 30
-		pass
+		
+		#Load Configurations
+		self.load_config("config/client.conf")
+
+	def load_config(self,url):
+		config = self.fm.load_json(url)
+		
+		if None == config:
+			self.write_config(url)
+			if self.DEBUG:
+				print("Configuration file created. Defaults loaded.")
+			return False
+		
+		if config["DEBUG"]:
+			self.DEBUG = config["DEBUG"]
+		
+		if config["HOST_NAME"]:
+			self.HOST = config["HOST_NAME"]
+			
+		if config["PORT"]:
+			self.PORT = config["PORT"]
+		
+		if config["SOCKET_TIMEOUT"]:
+			self.TIMEOUT = config["SOCKET_TIMEOUT"]
+		
+		if self.DEBUG:
+			print("Configurations loaded.")
+			
+		return True
+		
+	def write_config(self,url):
 	
+		data = {
+		"DEBUG":self.DEBUG,
+		"HOST_NAME":None,
+		"PORT":None,
+		"SOCKET_TIMEOUT":self.TIMEOUT}
+		
+		self.fm.write_json(url,data)
+		
 	def set_address(self,host,port):
 		self.HOST = host
 		self.PORT = port
@@ -28,7 +70,7 @@ class BWClient:
 			except socket.error as msg:
 				if self.DEBUG:
 					print ("Connection failed.")
-			sleep(5)
+				sleep(5)
 
 		self.sock.setblocking(0)
 		

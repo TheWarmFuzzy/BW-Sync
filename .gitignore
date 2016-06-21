@@ -60,6 +60,5 @@ config
 
 # Files
 # =========================
-server.bat
-client.bat
+*.bat
 log.txt
