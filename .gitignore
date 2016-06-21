@@ -45,3 +45,21 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+# =========================
+# Custom
+# =========================
+
+# Folders
+# =========================
+IGNORED
+Client Storage
+Server Storage
+config
+
+# Files
+# =========================
+server.bat
+client.bat
+log.txt
