@@ -1,3 +1,4 @@
+from file_manager import FileManager
 import socket
 import sys
 from _thread import *
@@ -6,6 +7,7 @@ from os import walk
 
 class BWServer:
 	def __init__(self):
+		self.fm = FileManager()
 		self.DEBUG = True
 		self.HOST = socket.gethostname()
 		self.PORT = 1234
@@ -43,15 +45,25 @@ class BWServer:
 	#I am a threaded function
 	def communicate(self, client, client_addr):
 		client.send(bytes("Welcome to the server!",'UTF-8'))
+		sleep(1)
 		while True:
 			try:
 				data = client.recv(1024)
-				print(str(data,'UTF-8'))
-
+				
 				if not data:
 					break
-				reply = "Pong"
+				command = str(data,'UTF-8')
+				print(command)
+				
+				reply = ""
+				if "Ping" == command or "PingPing" == command:
+					reply = "File"
+					
+				
+				
+				print(reply)
 				client.send(bytes(reply,'UTF-8'))
+				self.fm.send_file(client,"Wallpaper_Teacher.bmp")
 			except socket.error as msg:
 				#We lost them
 				break;

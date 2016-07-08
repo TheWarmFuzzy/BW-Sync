@@ -12,9 +12,11 @@ class BWClient:
 		self.PORT = 1234
 		self.TIMEOUT = 30
 		
+		self.receiving_file = False
+		
 		#Load Configurations
 		self.load_config("config/client.conf")
-
+		
 	def load_config(self,url):
 		config = self.fm.load_json(url)
 		
@@ -82,37 +84,44 @@ class BWClient:
 		
 	def listen(self):
 		void_messages = 0;
-		try:
-			data = self.sock.recv(1024)
-			if data:
-				str_data = str(data,'UTF-8')
-				if self.DEBUG:
-					print (str_data)
-				
-				if str_data == "Pong":
-					void_messages = 0
-					sleep(1)
-		except socket.error as msg:
-			if(void_messages > self.TIMEOUT):
-				if self.DEBUG:
-					print ("Connection timed out.")
-				self.reconnect()
-			else:
-				try:
-					self.sock.send(bytes("Ping",'UTF-8'))
+		if not self.receiving_file:
+			try:
+				data = self.sock.recv(1024)
+				if data:
+					str_data = str(data,'UTF-8')
+					
 					if self.DEBUG:
-						print("Ping")
-				except socket.error as msg:
+						print (str_data)
+					
+					if str_data == "Pong":
+						void_messages = 0
+						sleep(1)
+						
+					if str_data == "File":
+						self.receiving_file = True;
+						self.fm.receive_file(self.sock,"wpt.bmp")	
+						
+			except socket.error as msg:
+				if(void_messages > self.TIMEOUT):
 					if self.DEBUG:
-						print ("Connection to server lost.")
+						print ("Connection timed out.")
 					self.reconnect()
-			sleep(1)
+				else:
+					try:
+						self.sock.send(bytes("Ping",'UTF-8'))
+						if self.DEBUG:
+							print("Ping")
+					except socket.error as msg:
+						if self.DEBUG:
+							print ("Connection to server lost.")
+						self.reconnect()
+				sleep(1)
 
 	def start(self):
 		self.connect()
 		while True:
 			self.listen()
-		
+				
 if __name__ == "__main__":
 	client = BWClient()
 	client.start()
